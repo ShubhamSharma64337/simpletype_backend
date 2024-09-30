@@ -2,8 +2,26 @@ var express = require('express');
 var router = express.Router();
 let dotenv = require('dotenv').config()
 const { MongoClient } = require("mongodb");
+var session = require('express-session')
+
 
 const client = new MongoClient(process.env.MONGO_CONNECTION);
+
+router.use(session({
+  secret: 'Dbcrafter@123',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false }
+}))
+
+/*GET check login status*/
+router.get('/loginStatus',function(req,res,next){
+  if(req.session.user){
+      res.json({success: true, message: req.session.user.email})
+  }else{
+    res.json({success: false, message: null})
+  }
+})
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -49,7 +67,10 @@ router.post('/signup', function(req,res,next){
 
 /*POST login middleware*/
 router.post('/login',function(req,res,next){
-  if(!req.body.email || !req.body.password){
+  if(req.session.user){
+    res.json({success: false, message: 'Already logged in'});
+  }
+  else if(!req.body.email || !req.body.password){
     res.json({success: false, message: 'Invalid Login Data'});
   }else{
     next();
@@ -66,6 +87,7 @@ router.post('/login',function(req,res,next){
       const existing_user = await users.findOne({email: req.body.email, password: req.body.password});
       if(existing_user){
         authenticated = true;
+        req.session.user = {email: req.body.email};
       }
     } finally {
       // Ensures that the client will close when you finish/error
@@ -75,9 +97,9 @@ router.post('/login',function(req,res,next){
   run()
   .then(()=>{
     if(authenticated){
-      res.json({success:true, message: "Signin successful"})
+      res.json({success:true, message: req.body.email})
     } else {
-      res.json({success:false, message: "Invalid credentials"})
+      res.json({success:false, message: null})
     }
   })
   .catch(console.dir);
