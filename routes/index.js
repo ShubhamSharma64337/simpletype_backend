@@ -17,9 +17,9 @@ router.use(session({
 /*GET check login status*/
 router.get('/loginStatus',function(req,res,next){
   if(req.session.user){
-      res.json({success: true, message: req.session.user.email})
+      res.json({success: true, message: "User is logged in", payload: req.session.user.email})
   }else{
-    res.json({success: false, message: null})
+    res.json({success: false, message: "User not logged in", payload: null})
   }
 })
 
@@ -97,9 +97,9 @@ router.post('/login',function(req,res,next){
   run()
   .then(()=>{
     if(authenticated){
-      res.json({success:true, message: req.body.email})
+      res.json({success:true, message: "Successfully logged in", payload: req.session.user.email})
     } else {
-      res.json({success:false, message: null})
+      res.json({success:false, message: "Invalid credentials, login failed", payload: null})
     }
   })
   .catch(console.dir);
