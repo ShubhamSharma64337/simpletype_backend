@@ -59,7 +59,7 @@ router.get('/getresults',function(req,res,next){
       const database = client.db('simpletype');
       const users = database.collection('results');
       const results = await users.find({email: req.session.user.email},{projection: {_id: 0, email: 0}}).toArray();
-      sendRes = [...results];
+      sendRes = results.length>0?[...results]:null;
     } finally {
       // Ensures that the client will close when you finish/error
       // await client.close();
@@ -67,7 +67,7 @@ router.get('/getresults',function(req,res,next){
   }
   run()
   .then(()=>{
-      res.json({success:true, message: sendRes})
+      res.json({success:true, message: "Results Retrieved Successfully", payload: sendRes})
   })
   .catch(console.dir);
 })
