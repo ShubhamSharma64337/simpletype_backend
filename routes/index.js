@@ -11,7 +11,14 @@ router.use(session({
   secret: 'Dbcrafter@123',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false }
+  proxy: true, //without this, no cookie is received from the server when hosted on gcloud
+  cookie: { 
+    //Below, we use the NODE_ENV variable to modify the cookie attributes for making development and production app work properly
+    sameSite: process.env.NODE_ENV === 'production'?'none':'lax',
+    secure: process.env.NODE_ENV === 'production'?true:false, // This will only work if you have https enabled!
+    maxAge: 1800000, // 30 minutes
+    httpOnly: false
+  } 
 }))
 
 /*GET check login status*/
